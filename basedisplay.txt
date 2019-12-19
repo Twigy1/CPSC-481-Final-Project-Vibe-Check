@@ -1,0 +1,55 @@
+import numpy as np
+import cv2
+import pickle 
+
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_cascade = cv2.CascadeClassifier('Sauce/data/haarcascade_smile.xml')
+face_cascade2 = cv2.CascadeClassifier('Sauce/data/haarcascade_frontalface_alt2.xml')
+
+
+cap = cv2.VideoCapture(0)
+
+while(True):
+    ret, frame = cap.read()
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=80)
+    headcheck= face_cascade2.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=50)
+    
+    for (x, y, w, h) in headcheck:# 
+        
+ 
+        color = (0 , 50 , 250)
+        stroke2 = 2
+        width2 = x + w + 20
+        height2= y + h + 30
+        cv2.rectangle(frame, (x-30,y-100 ), (width2,height2), color, stroke2)
+
+        for (x, y, w, h) in faces:# if you smile it prints 
+            #print(x,y,w,h)
+            print("Currently Vibing")
+
+            roi_gray = gray[y:y+h,x:x+w] #basically range of prediction
+            roi_color = frame[y:y+h,x:x+w]#these also determine the picture we grab
+
+            img_item = "thepic.png"#saves pic
+            cv2.imwrite(img_item, roi_color)
+
+#BGR 0-255
+            color = (0 , 250 , 50)
+            stroke = 2
+            width = x + w
+            height= y + h
+            cv2.rectangle(frame, (x,y), (width,height), color, stroke)
+# frame, start corners of box, end corners of box
+
+#displays frame, i think camera feed q
+    cv2.imshow('frame',frame)
+    
+    if cv2.waitKey(20) & 0xFF == ord('q'):
+        break
+
+
+#self explanatory 
+cap.release()
+cv2.destroyAllWindows()

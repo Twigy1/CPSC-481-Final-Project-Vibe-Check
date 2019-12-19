@@ -1,0 +1,67 @@
+import numpy as np
+import cv2
+import pickle 
+
+recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_cascade = cv2.CascadeClassifier('Sauce/data/haarcascade_smile.xml')
+recognizer.read("tf.yml")#EXP file
+
+lables = {"Not Vibing" :0}
+lables = {"Vibe Check Passed" :1}
+with open("lables.pickle",'rb') as f:
+    tfmemory = pickle.load(f)    
+    lables = {v:k for k,v in tfmemory.items()}
+
+cap = cv2.VideoCapture(0)
+
+while(True):
+    ret, frame = cap.read()
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=60)
+#threshold for smile , higher the number, the more "perfect" it has to be 
+    c = 0
+    for (x, y, w, h) in faces:
+        #print(x,y,w,h)
+
+        name = "Currently Vibing"
+        print("Currently Vibing")
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        color = (255,255,255)
+        stroke = 2
+        cv2.putText(frame, name, (x,y), font, 1, color, stroke, cv2.LINE_AA)
+
+
+#gets the picture of ur smile
+        roi_gray = gray[y:y+h,x:x+w] #basically range of prediction
+        roi_color = frame[y:y+h,x:x+w]#these also determine the picture we grab
+
+#recognizer goes here i think
+#	Id, and confidence its similar (roi)
+        id_, conf = recognizer.predict(roi_gray) #make sure this has roi_gray as argument
+        if conf>=45 and conf<=85: #acceptable range
+#        if conf>=45 and conf<=85: #acceptable range
+          print(id_)
+          print(labels[id_])
+	    
+
+        img_item = "thepic.png"#saves pic
+        cv2.imwrite(img_item, roi_color)
+
+#BGR 0-255
+        color = (200 , 50 , 50)
+        stroke = 2
+        width = x + w
+        height= y + h
+        cv2.rectangle(frame, (x,y), (width,height), color, stroke)
+# frame, start corners of box, end corners of box
+
+#displays frame, i think camera feed 
+    cv2.imshow('frame',frame)
+    if cv2.waitKey(20) & 0xFF == ord('q'):
+        break
+
+
+#self explanatory 
+cap.release()
+cv2.destroyAllWindows()
